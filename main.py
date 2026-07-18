@@ -19,24 +19,6 @@ app.add_middleware(
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# --- RENDER İÇİN YEREL FFMPEG ENTEGRASYONU ---
-# Proje içindeki ffmpeg_bin klasörünün tam yolunu alıyoruz
-FFMPEG_DIR = os.path.join(os.getcwd(), "ffmpeg_bin")
-ffmpeg_path = os.path.join(FFMPEG_DIR, "ffmpeg")
-
-# Render Linux altyapısında dosyaların çalıştırılabilmesi için okuma/yazma/çalıştırma izinlerini veriyoruz
-if os.path.exists(ffmpeg_path):
-    try:
-        os.chmod(ffmpeg_path, 0o755)
-        os.chmod(os.path.join(FFMPEG_DIR, "ffprobe"), 0o755)
-        print(">>> Yerel FFmpeg izinleri başarıyla tanımlandı!")
-    except Exception as e:
-        print(f">>> İzin tanımlama uyarısı: {str(e)}")
-
-# Sistem yürütme yoluna ekle
-os.environ["PATH"] += os.pathsep + FFMPEG_DIR
-# ---------------------------------------------
-
 @app.post("/api/convert")
 async def convert_video(payload: dict):
     video_url = payload.get("url")
@@ -54,11 +36,10 @@ async def convert_video(payload: dict):
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'ffmpeg_location': ffmpeg_path, # Doğrudan dosyayı işaret et
         'quiet': True
     }
     
-    try:
+    try {
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
             
